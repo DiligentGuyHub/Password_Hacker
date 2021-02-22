@@ -19,7 +19,7 @@ stages:
   is_completed: true
 - id: 446
   step: 7220
-  is_completed: false
+  is_completed: true
 topics:
   0:
   - title: Binary numbers
